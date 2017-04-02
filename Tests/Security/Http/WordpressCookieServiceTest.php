@@ -4,6 +4,7 @@ namespace Kayue\WordpressBundle\Tests\Security\Http;
 
 use Kayue\WordpressBundle\Security\Authentication\Token\WordpressToken;
 use Kayue\WordpressBundle\Security\Http\WordpressCookieService;
+use Kayue\WordpressBundle\Wordpress\AuthenticationCookieManager;
 use Kayue\WordpressBundle\Wordpress\ConfigurationManager;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,7 +14,7 @@ class WordpressCookieServiceTest extends \PHPUnit_Framework_TestCase
     {
         $service = $this->getService();
         $request = new Request();
-        $request->cookies->set($this->getConfigurationManager()->getLoggedInCookieName(), 'admin|9999999999999|hmac');
+        $request->cookies->set($this->getAuthenticationCookieManagerMock()->getLoggedInCookieName(), 'admin|9999999999999|hmac');
 
         /** @var $token WordpressToken */
         $token = $service->autoLogin($request);
@@ -34,7 +35,7 @@ class WordpressCookieServiceTest extends \PHPUnit_Framework_TestCase
     {
         $service = $this->getService();
         $request = new Request();
-        $request->cookies->set($this->getConfigurationManager()->getLoggedInCookieName(), 'something');
+        $request->cookies->set($this->getAuthenticationCookieManagerMock()->getLoggedInCookieName(), 'something');
 
         $this->assertNull($service->autoLogin($request));
     }
@@ -43,7 +44,7 @@ class WordpressCookieServiceTest extends \PHPUnit_Framework_TestCase
     {
         $service = $this->getService();
         $request = new Request();
-        $request->cookies->set($this->getConfigurationManager()->getLoggedInCookieName(), 'nobody|9999999999999|hmac');
+        $request->cookies->set($this->getAuthenticationCookieManagerMock()->getLoggedInCookieName(), 'nobody|9999999999999|hmac');
 
         $this->assertNull($service->autoLogin($request));
     }
@@ -52,7 +53,7 @@ class WordpressCookieServiceTest extends \PHPUnit_Framework_TestCase
     {
         $service = $this->getService();
         $request = new Request();
-        $request->cookies->set($this->getConfigurationManager()->getLoggedInCookieName(), 'admin|9999999999999|invalid');
+        $request->cookies->set($this->getAuthenticationCookieManagerMock()->getLoggedInCookieName(), 'admin|9999999999999|invalid');
 
         $this->assertNull($service->autoLogin($request));
     }
@@ -61,26 +62,34 @@ class WordpressCookieServiceTest extends \PHPUnit_Framework_TestCase
     {
         $service = $this->getService();
         $request = new Request();
-        $request->cookies->set($this->getConfigurationManager()->getLoggedInCookieName(), 'admin|1|hmac');
+        $request->cookies->set($this->getAuthenticationCookieManagerMock()->getLoggedInCookieName(), 'admin|1|hmac');
 
         $this->assertNull($service->autoLogin($request));
     }
 
     private function getService()
     {
-        $mock = $this->getMock(
-            'Kayue\WordpressBundle\Security\Http\WordpressCookieService',
-            array('generateHmac'),
-            array($this->getConfigurationManager(), $this->getUserProviderMock())
+        $wordpressCookieService = new WordpressCookieService(
+            $this->getAuthenticationCookieManagerMock(),
+            $this->getUserProviderMock()
         );
+
+        return $wordpressCookieService;
+    }
+
+    private function getAuthenticationCookieManagerMock()
+    {
+        $mock = $this->getMock(AuthenticationCookieManager::class,
+            array('generateHmac'),
+            array($this->getConfigurationManager())
+            );
+
         $mock->expects($this->any())
             ->method('generateHmac')
             ->withAnyParameters()
             ->will($this->returnValue('hmac'));
-
         return $mock;
     }
-
     private function getConfigurationManager()
     {
         return new ConfigurationManager('example.com', '/', null, 'key', 'salt');
