@@ -17,8 +17,9 @@
         "phpspec/phpspec": "~2.0"
     },
     "autoload": {
-        "psr-4": {
+        "psr-0": {
             "Kayue\\WordpressBundle": ""
-        }
+        },
+        "target-dir": "Kayue/WordpressBundle"
     }
 }
