@@ -39,7 +39,7 @@ class WordpressCookieService
     public function __construct(
         AuthenticationCookieManager $cookieManager,
         UserProviderInterface $userProvider,
-        array $options = array(),
+        $options = array(),
         LoggerInterface $logger = null
     )
     {

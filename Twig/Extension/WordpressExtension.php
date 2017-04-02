@@ -35,19 +35,27 @@ class WordpressExtension extends \Twig_Extension
     protected $attachmentHelper;
 
     /**
-     * @param ManagerRegistry  $managerRegistry
-     * @param ShortcodeChain   $shortcodeChain
-     * @param AttachmentHelper $attachmentHelper
+     * @param ManagerRegistry $managerRegistry
      */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        ShortcodeChain $shortcodeChain,
-        AttachmentHelper $attachmentHelper
-    )
+    public function setManagerRegistry($managerRegistry)
     {
         $this->managerRegistry = $managerRegistry;
         $this->manager = $managerRegistry->getManager();
+    }
+
+    /**
+     * @param ShortcodeChain $shortcodeChain
+     */
+    public function setShortcodeChain($shortcodeChain)
+    {
         $this->shortcodeChain = $shortcodeChain;
+    }
+
+    /**
+     * @param AttachmentHelper $attachmentHelper
+     */
+    public function setAttachmentHelper($attachmentHelper)
+    {
         $this->attachmentHelper = $attachmentHelper;
     }
 
